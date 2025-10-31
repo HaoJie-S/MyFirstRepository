@@ -19,7 +19,7 @@ class LoginAndOpeatipn:
         service = Service(executable_path=self.chrome_driver_path)
         self.driver = webdriver.Chrome(service=service)
         self.driver.get(self.url)
-        # self.driver.maximize_window()
+        self.driver.maximize_window()
 
     def login(self):
         username = WebDriverWait(self.driver, 10).until(
@@ -30,8 +30,8 @@ class LoginAndOpeatipn:
         yzm = self.driver.find_element(By.CSS_SELECTOR, 'input[placeholder="请输入图形验证码"]')
         # self.driver.execute_script("agreementBtn.click();", check_agreement)
         check_agreement.click()
-        username.send_keys("admin")
-        password.send_keys("8808")
+        username.send_keys("111")
+        password.send_keys("111")
         max_retries = 3
         retry_count = 0
         while retry_count < max_retries:
@@ -104,15 +104,35 @@ class LoginAndOpeatipn:
             EC.element_to_be_clickable((By.XPATH, "//span[text()='RTCM 3.x']"))
         )
         self.driver.execute_script("arguments[0].click();", geshi)
-        sleep(1)
 
-        exit = WebDriverWait(self.driver, 10).until(
+        port = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
-                "//button/span[contains(normalize-space(),'取消')]"
+                "//label[text()='端口']/following::input[@class='t-input__inner']"
             ))
         )
-        self.driver.execute_script("arguments[0].click();", exit)
+        port.send_keys("8003")
+
+        max_connects = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                "//label[text()='最大连接数']/following::input[@class='t-input__inner']"
+            ))
+        )
+        self.driver.execute_script("arguments[0].value = '10';", max_connects)
+        open_close = self.driver.find_element(By.XPATH, "//span[contains(normalize-space(),'开启')]")
+        self.driver.execute_script("arguments[0].click();", open_close)
+        make_sure = self.driver.find_element(By.XPATH, "//button/span[contains(normalize-space(),'确认')]")
+        self.driver.execute_script("arguments[0].click();", make_sure)
+        sleep(5)
+
+        # exit = WebDriverWait(self.driver, 10).until(
+        #     EC.presence_of_element_located((
+        #         By.XPATH,
+        #         "//button/span[contains(normalize-space(),'取消')]"
+        #     ))
+        # )
+        # self.driver.execute_script("arguments[0].click();", exit)
         sleep(2)
 
     def open_close(self):
@@ -156,18 +176,41 @@ class LoginAndOpeatipn:
         iframes = self.driver.find_elements(By.TAG_NAME, "iframe")
         print(f"🖼️ 页面中有 {len(iframes)} 个iframe")
 
+    def delete(self):
+        # 步骤1：定位第一个tr
+        first_tr = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//tbody/tr[1]"))  # 定位tbody下的第一个tr
+        )
+        # 步骤2：在第一个tr内定位“编辑”链接
+        edit_link = first_tr.find_element(
+            By.XPATH, ".//a[text()='删除']"
+        )
+        self.driver.execute_script("arguments[0].click();", edit_link)
+
+        # 调试：查看有多少个确认按钮
+        sleep(2)  # 等待弹窗出现
+        confirm_buttons = self.driver.find_elements(By.XPATH, "//button/span[text()='确认']")
+        print(f"🔍 找到 {len(confirm_buttons)} 个确认按钮")
+
+        make_sure_delete = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "(//button/span[text()='确认'])[2]"))
+        )
+        self.driver.execute_script("arguments[0].click();", make_sure_delete)
+        sleep(5)
+
 
 if __name__ == '__main__':
-    login_url = "http://119.96.209.132:18081/sw/#/login"
+    login_url = "http://58.49.94.131:18500/sw/#/login"
     chrome_driver_path = r'C:\Program Files\JetBrains\PyCharm Community Edition 2023.1.2\bin\chromedriver.exe'
     login_and_open = LoginAndOpeatipn(chrome_driver_path, login_url)
     login_and_open.setup_driver()
     login_and_open.login()
     # login_and_open.debug_dom_structure()
-    # login_and_open.add()
+    #login_and_open.add()
     # a = 1
     # while a < 20:
     #     login_and_open.open_close()
     #     a += 1
     #     sleep(2)
+    login_and_open.delete()
     login_and_open.close_driver()
