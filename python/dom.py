@@ -1,3 +1,6 @@
+from selenium.webdriver.common.by import By
+
+
 def debug_dom_structure(self):
     """调试DOM结构"""
     # 查看页面HTML源码
