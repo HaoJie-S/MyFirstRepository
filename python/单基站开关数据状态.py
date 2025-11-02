@@ -201,12 +201,13 @@ class LoginAndOpeatipn:
 
 if __name__ == '__main__':
     login_url = "http://58.49.94.131:18500/sw/#/login"
-    chrome_driver_path = r'C:\Program Files\JetBrains\PyCharm Community Edition 2023.1.2\bin\chromedriver.exe'
+    #   D: / workspace / python / PyCharm2025.2.4 / chromedriver - win64 / chromedriver.exe
+    chrome_driver_path = r'D:/workspace/python/PyCharm 2025.2.4/chromedriver-win64/chromedriver.exe'
     login_and_open = LoginAndOpeatipn(chrome_driver_path, login_url)
     login_and_open.setup_driver()
     login_and_open.login()
     # login_and_open.debug_dom_structure()
-    #login_and_open.add()
+    login_and_open.add()
     # a = 1
     # while a < 20:
     #     login_and_open.open_close()
