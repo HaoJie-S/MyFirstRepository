@@ -78,9 +78,9 @@ class LoginAndOpeatipn:
         data_collection.click()
 
     # 创建一个汇集任务
-    def add(self, port):
+    def add(self, HJ_id):
         add1 = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located(
+            EC.visibility_of_element_located(
                 (By.XPATH, "//button[contains(@class, 't-button--theme-primary')]//span[text()='创建任务']"))
         )
         self.driver.execute_script("arguments[0].click()", add1)
@@ -90,7 +90,7 @@ class LoginAndOpeatipn:
                 "//label[text()='汇集任务名称']/following::input[@class='t-input__inner']"
             ))
         )
-        collect_name.send_keys(port)
+        collect_name.send_keys(HJ_id)
         message_type = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
@@ -123,7 +123,10 @@ class LoginAndOpeatipn:
         self.driver.execute_script("arguments[0].click();", open_close)
         make_sure = self.driver.find_element(By.XPATH, "//button/span[contains(normalize-space(),'确认')]")
         self.driver.execute_script("arguments[0].click();", make_sure)
-        sleep(2)
+        msg = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//tbody/tr/td[contains(normalize-space(),'1001')]"))
+        )
+
         # exit = WebDriverWait(self.driver, 10).until(
         #     EC.presence_of_element_located((
         #         By.XPATH,
@@ -178,7 +181,7 @@ class LoginAndOpeatipn:
         first_tr = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.XPATH, "//tbody/tr[1]"))  # 定位tbody下的第一个tr
         )
-        # 步骤2：在第一个tr内定位“编辑”链接
+        # 步骤2：在第一个tr内定位“删除”链接
         edit_link = first_tr.find_element(
             By.XPATH, ".//a[text()='删除']"
         )
@@ -193,6 +196,9 @@ class LoginAndOpeatipn:
             EC.presence_of_element_located((By.XPATH, "(//button/span[text()='确认'])[2]"))
         )
         self.driver.execute_script("arguments[0].click();", make_sure_delete)
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//div[contains(normalize-space(),'删除成功')]"))
+        )
 
 
 if __name__ == '__main__':
@@ -205,12 +211,12 @@ if __name__ == '__main__':
     login_and_open.login()
     # login_and_open.debug_dom_structure()
     a = 0
-    port = 1001
-    while a <= 2:
-        # login_and_open.add(port)
+    HJ_id = 1001
+    while a <= 10:
+        login_and_open.add(HJ_id)
         login_and_open.delete()
         sleep(2)
-        port += 1
+        # HJ_id += 1
         a += 1
     # a = 1
     # while a < 20:
