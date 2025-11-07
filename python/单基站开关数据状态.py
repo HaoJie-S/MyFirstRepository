@@ -40,7 +40,8 @@ class LoginAndOpeatipn:
             yzm.send_keys(Keys.DELETE)
             yzm.send_keys(captcha_input)
 
-            login_button = self.driver.find_element(By.XPATH, '//button/span[contains(normalize-space(),"立即登录")]')
+            # login_button = self.driver.find_element(By.XPATH, '//button/span[contains(normalize-space(),"立即登录")]')
+            login_button = self.driver.find_element(By.CSS_SELECTOR, '#app > div > div > form > button > span')
             login_button.click()
             try:
                 error_msg = WebDriverWait(self.driver, 1).until(
@@ -178,12 +179,16 @@ class LoginAndOpeatipn:
 
     def delete(self):
         # 步骤1：定位第一个tr
-        first_tr = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//tbody/tr[1]"))  # 定位tbody下的第一个tr
-        )
+        # first_tr = WebDriverWait(self.driver, 10).until(
+        #     EC.presence_of_element_located((By.XPATH, "//tbody/tr[1]"))  # 定位tbody下的第一个tr
+        # )
         # 步骤2：在第一个tr内定位“删除”链接
-        edit_link = first_tr.find_element(
-            By.XPATH, ".//a[text()='删除']"
+        # edit_link = first_tr.find_element(
+        #     By.XPATH, ".//a[text()='删除']"
+        # )
+        edit_link = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//*[@id='content']/div[1]/div[2]/div/div/div/div/div/div["
+                                                      "1]/table/tbody/tr[1]/td[14]/div/div[2]/a[text()='删除']"))
         )
         self.driver.execute_script("arguments[0].click();", edit_link)
 
@@ -212,7 +217,7 @@ if __name__ == '__main__':
     # login_and_open.debug_dom_structure()
     a = 0
     HJ_id = 1001
-    while a <= 10:
+    while a <= 1:
         login_and_open.add(HJ_id)
         login_and_open.delete()
         sleep(2)
