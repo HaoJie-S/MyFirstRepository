@@ -26,7 +26,7 @@ class LoginAndOpeatipn:
             EC.presence_of_element_located((By.NAME, 'username'))
         )
         password = self.driver.find_element(By.NAME, 'password')
-        check_agreement = self.driver.find_element(By.CSS_SELECTOR, 'span.t-checkbox__input')
+        check_agreement = self.driver.find_element(By.CSS_SELECTOR, 'label.t-checkbox')
         yzm = self.driver.find_element(By.CSS_SELECTOR, 'input[placeholder="请输入图形验证码"]')
         # self.driver.execute_script("agreementBtn.click();", check_agreement)
         check_agreement.click()
@@ -40,8 +40,10 @@ class LoginAndOpeatipn:
             yzm.send_keys(Keys.DELETE)
             yzm.send_keys(captcha_input)
 
-            # login_button = self.driver.find_element(By.XPATH, '//button/span[contains(normalize-space(),"立即登录")]')
+            # login_button = self.driver.find_element(By.XPATH, '//button/span[contains(normalize-space(),"立即登录")]')  可行的xpath
             login_button = self.driver.find_element(By.CSS_SELECTOR, '#app > div > div > form > button > span')
+            # login_button = self.driver.find_element(By.CSS_SELECTOR, '//span[contains(normalize-space(), "立即登录")]')
+            # CSS选择器无法匹配文本
             login_button.click()
             try:
                 error_msg = WebDriverWait(self.driver, 1).until(
@@ -146,7 +148,10 @@ class LoginAndOpeatipn:
             By.XPATH,
             ".//a[text()='编辑' and contains(@class, 't-link--theme-primary')]"
         )
-        self.driver.execute_script("arguments[0].click();", edit_link)
+        # 将上面两个步骤合二为一的选择器
+        edit_link2 = self.driver.find_element(By.XPATH, "//*[@id='content']/div[1]/div[2]/div/div/div/div/div/div["
+                                                        "1]/table/tbody/tr[1]/td[14]/div/div[1]/a")
+        self.driver.execute_script("arguments[0].click();", edit_link2)
         sleep(1)
         open_close = self.driver.find_element(By.XPATH, "//span[contains(normalize-space(),'开启')]")
         self.driver.execute_script("arguments[0].click();", open_close)
@@ -215,17 +220,17 @@ if __name__ == '__main__':
     login_and_open.setup_driver()
     login_and_open.login()
     # login_and_open.debug_dom_structure()
-    a = 0
-    HJ_id = 1001
-    while a <= 1:
-        login_and_open.add(HJ_id)
-        login_and_open.delete()
-        sleep(2)
-        # HJ_id += 1
-        a += 1
-    # a = 1
-    # while a < 20:
-    #     login_and_open.open_close()
-    #     a += 1
+    # a = 0
+    # HJ_id = 1001
+    # while a <= 1:
+    #     login_and_open.add(HJ_id)
+    #     login_and_open.delete()
     #     sleep(2)
+        # HJ_id += 1
+        # a += 1
+    a = 1
+    while a < 20:
+        login_and_open.open_close()
+        a += 1
+        sleep(2)
     login_and_open.close_driver()

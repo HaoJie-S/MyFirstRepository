@@ -1,99 +1,158 @@
-from selenium.webdriver.support import expected_conditions as EC
 from time import sleep
 
 from selenium import webdriver
 from selenium.webdriver import Keys
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
 
 
-class LoginAndOpreation:
-    def __init__(self, chrome_driver_path, url):
-        self.driver = None  # 先占位，后面再初始化
+class Login:
+    def __init__(self, chromedriver_path, url):
+        self.chromedriver_path = chromedriver_path
         self.url = url
-        self.chrome_driver_path = chrome_driver_path
+        self.driver = None
 
     def setup_driver(self):
-        service = Service(executable_path=self.chrome_driver_path)
+        service = Service(executable_path=self.chromedriver_path)
         self.driver = webdriver.Chrome(service=service)
         self.driver.get(self.url)
-        self.driver.maximize_window()
 
-    def login(self):
-        WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//h3[contains(text(),"欢迎")]'))
+    def login(self, username, password):
+        username_site = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "username"))
         )
-        sleep(2)
-        right_page = self.driver.find_element(By.XPATH, '//a[text()="账号密码登录"]')
-        if right_page:
-            right_page.click()
-        username = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.NAME, 'username'))
+        username_site.send_keys(username)
+        password_site = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "password"))
         )
-        password = self.driver.find_element(By.NAME, "password")
-        yzm = self.driver.find_element(By.CSS_SELECTOR, 'input[placeholder="请输入图形验证码"]')
-        agreee_btn = self.driver.find_element(By.CSS_SELECTOR, 'span.t-checkbox__input')
-        login_buton = self.driver.find_element(By.XPATH, '//button/span[text()="立即登录"]/..')
-        username.send_keys("102")
-        password.send_keys("8808")
-        agreee_btn.click()
-
-        max_retries = 3
-        retry_count = 0
-        while retry_count < max_retries:
-            captch_input = input("请在浏览器查看验证码，然后控制台输入，按回车结束")
-            yzm.send_keys(Keys.CONTROL, "a")
-            yzm.send_keys(Keys.DELETE)
-            yzm.send_keys(captch_input)
-            login_buton.click()
+        password_site.send_keys(password)
+        check_box = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//*[@id='app']/div/div/form/div[5]/label/span[1]"))
+        )
+        self.driver.execute_script("arguments[0].click();", check_box)
+        login_btn = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, '//button/span[contains(normalize-space(),"立即登录")]'))
+        )
+        yzm_site = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/form/div[2]/div/div/div/div/input'))
+        )
+        max_tries = 3
+        for i in range(max_tries):
             try:
-                error_msg = WebDriverWait(self.driver, 1).until(
-                    EC.presence_of_element_located((By.XPATH, '//div[contains(text(),"无效的验证码")]'))
-                )
-                if "无效" in error_msg.text:
-                    print("验证码错误，请重新输入")
-                    retry_count += 1
-                    continue
-                else:
+                yzm = input("请查看验证码以后输入，点击enter: ")
+
+                # 清空并输入验证码
+                yzm_site.send_keys(Keys.CONTROL, "a")
+                yzm_site.send_keys(Keys.DELETE)
+                yzm_site.send_keys(yzm)
+                sleep(1)
+                self.driver.execute_script("arguments[0].click();", login_btn)
+
+                # 检查是否出现错误提示
+                try:
+                    error_msg = WebDriverWait(self.driver, 1).until(
+                        EC.presence_of_element_located((By.XPATH, '//div[contains(., "无效的验证码")]'))
+                    )
+                    if "无效的" in error_msg.text:
+                        print(f"验证码错误，还剩 {max_tries - i - 1} 次尝试")
+                        continue
+                except:
+                    # 没有错误提示，说明登录成功
                     print("登录成功")
                     break
             except:
-                print("未出现无效验证码提示")
-                break
-
-        if retry_count >= max_retries:
+                print(f"验证码输入错误，还剩 {max_tries - i - 1} 次尝试")
+                continue
+        else:
+            print("登录失败，请检查用户名和密码")
+            self.driver.quit()
             exit()
 
-    def login_operation(self):
-        choice1 = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, 'div.top-nav-btn'))
+        button1 = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/section/aside/div/div/div/div/div/div[2]'))
         )
-        choice1.click()
-        user_dev = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '//a[contains(normalize-space(),"账号管理平台(dev用户)")]'))
-            # //normalize-space()作用是去除空格
+        self.driver.execute_script("arguments[0].click();", button1)
+        button2 = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, '//*[@id="app"]/section/aside/div/div/div/div/div/div[3]/div/div[2]/div[3]/div/div/div/a'))
         )
-        user_dev.click()
-        MakeSure = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//span[contains(normalize-space(),"确认授权")]'))
+        self.driver.execute_script("arguments[0].click();", button2)
+        button3 = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*[@id="app"]/div/div/div[2]/div[1]/button/span'))
         )
-        MakeSure.click()
-        sleep(10)
+        self.driver.execute_script("arguments[0].click();", button3)
 
-    def quit_driver(self):
+    def close_driver(self):
         self.driver.quit()
 
-    # +++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+class Operation:
+    def __init__(self, driver):
+        self.driver = driver
+
+    def add(self, hj_id, hj_port):
+        button1 = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                '//*[@id="app"]/section/aside/div/div/div/ul/div/li[1]/span[contains(normalize-space(), "数据汇集")]'))
+        )
+        self.driver.execute_script("arguments[0].click();", button1)
+        new_button = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                '//*[@id="content"]/div[1]/div[1]/div/div/div/div/div[2]/div[1]/button/span[contains(normalize-space('
+                '), "创建任务")]'))
+        )
+        self.driver.execute_script("arguments[0].click();", new_button)
+        hj_id_site = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                '//*[@id="content"]/div[2]/div/div[2]/div/div/div[2]/form/div[1]/div[1]/div/div[2]/div/div/div/input'))
+        )
+        hj_id_site.send_keys(hj_id)
+        msg_type_site = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                '//*[@id="content"]/div[2]/div/div[2]/div/div/div[2]/form/div[2]/div[1]/div/div[2]/div/div/div'))
+        )
+        msg_type_site.click()
+        msg_type_site1 = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                '/html/body/div[2]/div/div/div/ul/li[1]'))
+        )
+        self.driver.execute_script("arguments[0].click();", msg_type_site1)
+        hj_port_site = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                '//*[@id="content"]/div[2]/div/div[2]/div/div/div[2]/form/div[5]/div/div/div[2]/div/div/div/input'))
+        )
+        hj_port_site.send_keys(hj_port)
+        hj_status_site = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                '//*[@id="content"]/div[2]/div/div[2]/div/div/div[2]/form/div[7]/div/div/div[2]/div/label/span[1]'))
+        )
+        hj_status_site.click()
+        submit_btn = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                '//*[@id="content"]/div[2]/div/div[2]/div/div/div[3]/div/button[2]/span[contains(normalize-space(), '
+                '"确认")]'))
+        )
+        self.driver.execute_script("arguments[0].click();", submit_btn)
 
 
 if __name__ == '__main__':
-    chrome_driver_path = r'C:\Program Files\JetBrains\PyCharm Community Edition 2023.1.2\bin\chromedriver.exe'
-    url = "http://58.49.94.131:30082/kplsso-dev/#/login"
-
-    login_operate = LoginAndOpreation(chrome_driver_path, url)
-    login_operate.setup_driver()
-    login_operate.login()
-    login_operate.login_operation()
-
-    login_operate.quit_driver()  # 退出浏览器
+    url = "http://58.49.94.131:18500/sw/#/login"
+    chromedriver_path = r'C:/Program Files/JetBrains/PyCharm Community Edition 2023.1.2/bin/chromedriver.exe'
+    login = Login(chromedriver_path, url)
+    login.setup_driver()
+    login.login("111", "111")
+    operation = Operation(login.driver)
+    operation.add("hj8000", "8000")
+    sleep(5)
+    login.close_driver()
