@@ -1,3 +1,4 @@
+import csv
 from time import sleep
 
 from selenium import webdriver
@@ -18,6 +19,7 @@ class Login:
         service = Service(executable_path=self.chromedriver_path)
         self.driver = webdriver.Chrome(service=service)
         self.driver.get(self.url)
+        self.driver.maximize_window()
 
     def login(self, username, password):
         username_site = WebDriverWait(self.driver, 10).until(
@@ -116,9 +118,9 @@ class Operation:
         msg_type_site = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
-                '//*[@id="content"]/div[2]/div/div[2]/div/div/div[2]/form/div[2]/div[1]/div/div[2]/div/div/div'))
+                '//*[@id="content"]/div[2]/div/div[2]/div/div/div[2]/form/div[2]/div[1]/div/div[2]/div/div/div/div/div/input'))
         )
-        msg_type_site.click()
+        self.driver.execute_script("arguments[0].click();", msg_type_site)
         msg_type_site1 = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
@@ -136,7 +138,7 @@ class Operation:
                 By.XPATH,
                 '//*[@id="content"]/div[2]/div/div[2]/div/div/div[2]/form/div[7]/div/div/div[2]/div/label/span[1]'))
         )
-        hj_status_site.click()
+        self.driver.execute_script("arguments[0].click();", hj_status_site)
         submit_btn = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
@@ -144,6 +146,50 @@ class Operation:
                 '"确认")]'))
         )
         self.driver.execute_script("arguments[0].click();", submit_btn)
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                '/html/body/div[3]/div/div[contains(normalize-space(), "添加成功")]'))
+        )
+
+    @staticmethod
+    def read_tasks_from_csv(filename='tasks.csv'):
+        tasks = []
+        with open(filename, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            next(reader)  # 跳过标题行
+
+            for row in reader:
+                if len(row) >= 2:
+                    hj_id = row[0].strip()  # 第一列
+                    hj_port = row[1].strip()  # 第二列
+                    tasks.append((hj_id, hj_port))
+
+        return tasks
+
+    def add_tasks_from_csv(self, filename='tasks.csv'):
+        tasks = self.read_tasks_from_csv(filename)
+        for hj_id, hj_port in tasks:
+            self.add(hj_id, hj_port)
+            sleep(1)  # 建议添加延迟
+
+    def delete(self):
+        delete_btn = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH, '//*[@id="content"]/div[1]/div[2]/div/div/div/div/div/div[1]/table/tbody/tr[1]/td['
+                          '14]/div/div[2]/a'))
+        )
+        self.driver.execute_script("arguments[0].click();", delete_btn)
+        submit_btn = WebDriverWait(self.driver, 10).until(
+            EC.element_to_be_clickable((
+                By.XPATH, "(//button/span[text()='确认'])[2]"))
+        )
+        self.driver.execute_script("arguments[0].click();", submit_btn)
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                '/html/body/div[3]/div/div[contains(normalize-space(), "删除成功")]'))
+        )
 
 
 if __name__ == '__main__':
@@ -153,6 +199,28 @@ if __name__ == '__main__':
     login.setup_driver()
     login.login("111", "111")
     operation = Operation(login.driver)
-    operation.add("hj8000", "8000")
-    sleep(5)
+    operation.add(8888, 8888)
+    # hj_id = 8000
+    # hj_port = 8000
+    # for i in range(3):
+    #     try:
+    #         operation.add(hj_id, hj_port)
+    #         hj_id += 1
+    #         hj_port += 1
+    #         continue
+    #     except:
+    #         print(f"第{i + 1}次尝试失败，重试中...")
+
+    # for i in range(3):
+    #     try:
+    #         operation.delete()
+    #         continue
+    #     except:
+    #         print(f"第{i + 1}次尝试失败，重试中...")
+    operation.delete()
+
+    # print("=== 使用CSV文件批量添加任务 ===")
+    # operation.add_tasks_from_csv("tasks.csv")
+
+    # sleep(5)
     login.close_driver()
