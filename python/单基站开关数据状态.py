@@ -22,6 +22,16 @@ class LoginAndOpeatipn:
         self.driver.maximize_window()
 
     def login(self):
+        # 保障页面加载完成
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//h3[contains(text(), "欢迎使用")]'))
+        )
+        sleep(2)
+        page = self.driver.find_element(By.XPATH, '//a[text()="账号密码登录"]')
+        # 如果page按钮存在，就点击，没有就不管
+        if page:
+            page.click()
+
         username = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.NAME, 'username'))
         )

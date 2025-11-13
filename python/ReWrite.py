@@ -3,10 +3,11 @@ from time import sleep
 
 from selenium import webdriver
 from selenium.webdriver import Keys
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+from webdriver_manager.chrome import ChromeDriverManager
 
 
 class Login:
@@ -22,6 +23,15 @@ class Login:
         self.driver.maximize_window()
 
     def login(self, username, password):
+        # 保障页面加载完成
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//h3[contains(text(), "欢迎使用")]'))
+        )
+        sleep(2)
+        page = self.driver.find_element(By.XPATH, '//a[text()="账号密码登录"]')
+        # 如果page按钮存在，就点击，没有就不管
+        if page:
+            page.click()
         username_site = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.NAME, "username"))
         )
@@ -118,7 +128,8 @@ class Operation:
         msg_type_site = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
-                '//*[@id="content"]/div[2]/div/div[2]/div/div/div[2]/form/div[2]/div[1]/div/div[2]/div/div/div/div/div/input'))
+                '//*[@id="content"]/div[2]/div/div[2]/div/div/div[2]/form/div[2]/div[1]/div/div['
+                '2]/div/div/div/div/div/input'))
         )
         self.driver.execute_script("arguments[0].click();", msg_type_site)
         msg_type_site1 = WebDriverWait(self.driver, 10).until(
@@ -167,13 +178,20 @@ class Operation:
 
         return tasks
 
-    def add_tasks_from_csv(self, filename='tasks.csv'):
+    def add_tasks_from_csv(self, filename):
+        filename = 'E:/code/MyFirstRepository/python/tasks.csv'
         tasks = self.read_tasks_from_csv(filename)
         for hj_id, hj_port in tasks:
             self.add(hj_id, hj_port)
             sleep(1)  # 建议添加延迟
 
     def delete(self):
+        button1 = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((
+                By.XPATH,
+                '//*[@id="app"]/section/aside/div/div/div/ul/div/li[1]/span[contains(normalize-space(), "数据汇集")]'))
+        )
+        self.driver.execute_script("arguments[0].click();", button1)
         delete_btn = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((
                 By.XPATH, '//*[@id="content"]/div[1]/div[2]/div/div/div/div/div/div[1]/table/tbody/tr[1]/td['
@@ -182,7 +200,8 @@ class Operation:
         self.driver.execute_script("arguments[0].click();", delete_btn)
         submit_btn = WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((
-                By.XPATH, "(//button/span[text()='确认'])[2]"))
+                By.XPATH, "(//div/div[contains(normalize-space(), '是否删除')])[1]/parent::div/button/span[contains("
+                          "normalize-space(), '确认')]"))
         )
         self.driver.execute_script("arguments[0].click();", submit_btn)
         WebDriverWait(self.driver, 10).until(
@@ -199,7 +218,7 @@ if __name__ == '__main__':
     login.setup_driver()
     login.login("111", "111")
     operation = Operation(login.driver)
-    operation.add(8888, 8888)
+    # operation.add(8888, 8888)
     # hj_id = 8000
     # hj_port = 8000
     # for i in range(3):
@@ -210,17 +229,8 @@ if __name__ == '__main__':
     #         continue
     #     except:
     #         print(f"第{i + 1}次尝试失败，重试中...")
-
-    # for i in range(3):
-    #     try:
-    #         operation.delete()
-    #         continue
-    #     except:
-    #         print(f"第{i + 1}次尝试失败，重试中...")
-    operation.delete()
-
     # print("=== 使用CSV文件批量添加任务 ===")
-    # operation.add_tasks_from_csv("tasks.csv")
-
-    # sleep(5)
+    operation.add_tasks_from_csv("tasks.csv")
+    for i in range(3):
+        operation.delete()
     login.close_driver()
