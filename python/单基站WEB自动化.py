@@ -22,11 +22,21 @@ class LoginAndOpeatipn:
         self.driver.maximize_window()
 
     def login(self):
+        # 保障页面加载完成
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//h3[contains(text(), "欢迎使用")]'))
+        )
+        sleep(2)
+        page = self.driver.find_element(By.XPATH, '//a[text()="账号密码登录"]')
+        # 如果page按钮存在，就点击，没有就不管
+        if page:
+            page.click()
+
         username = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.NAME, 'username'))
         )
         password = self.driver.find_element(By.NAME, 'password')
-        check_agreement = self.driver.find_element(By.CSS_SELECTOR, 'span.t-checkbox__input')
+        check_agreement = self.driver.find_element(By.CSS_SELECTOR, 'label.t-checkbox')
         yzm = self.driver.find_element(By.CSS_SELECTOR, 'input[placeholder="请输入图形验证码"]')
         # self.driver.execute_script("agreementBtn.click();", check_agreement)
         check_agreement.click()
@@ -40,7 +50,10 @@ class LoginAndOpeatipn:
             yzm.send_keys(Keys.DELETE)
             yzm.send_keys(captcha_input)
 
-            login_button = self.driver.find_element(By.XPATH, '//button/span[contains(normalize-space(),"立即登录")]')
+            # login_button = self.driver.find_element(By.XPATH, '//button/span[contains(normalize-space(),"立即登录")]')  可行的xpath
+            login_button = self.driver.find_element(By.CSS_SELECTOR, '#app > div > div > form > button > span')
+            # login_button = self.driver.find_element(By.CSS_SELECTOR, '//span[contains(normalize-space(), "立即登录")]')
+            # CSS选择器无法匹配文本
             login_button.click()
             try:
                 error_msg = WebDriverWait(self.driver, 1).until(
@@ -78,27 +91,26 @@ class LoginAndOpeatipn:
         data_collection.click()
 
     # 创建一个汇集任务
-    def add(self):
+    def add(self, HJ_id):
         add1 = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located(
+            EC.visibility_of_element_located(
                 (By.XPATH, "//button[contains(@class, 't-button--theme-primary')]//span[text()='创建任务']"))
         )
-        add1.click()
-        sleep(2)
+        self.driver.execute_script("arguments[0].click()", add1)
         collect_name = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
                 "//label[text()='汇集任务名称']/following::input[@class='t-input__inner']"
             ))
         )
-        collect_name.send_keys("bf0001")
+        collect_name.send_keys(HJ_id)
         message_type = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((
                 By.XPATH,
                 "//label[text()='数据格式']/following::input[@class='t-input__inner']"
-                ))
+            ))
         )
-        message_type.click()
+        self.driver.execute_script("arguments[0].click()", message_type)
 
         geshi = WebDriverWait(self.driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, "//span[text()='RTCM 3.x']"))
@@ -124,7 +136,9 @@ class LoginAndOpeatipn:
         self.driver.execute_script("arguments[0].click();", open_close)
         make_sure = self.driver.find_element(By.XPATH, "//button/span[contains(normalize-space(),'确认')]")
         self.driver.execute_script("arguments[0].click();", make_sure)
-        sleep(5)
+        msg = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//tbody/tr/td[contains(normalize-space(),'1001')]"))
+        )
 
         # exit = WebDriverWait(self.driver, 10).until(
         #     EC.presence_of_element_located((
@@ -133,7 +147,6 @@ class LoginAndOpeatipn:
         #     ))
         # )
         # self.driver.execute_script("arguments[0].click();", exit)
-        sleep(2)
 
     def open_close(self):
         # 步骤1：定位第一个tr
@@ -145,7 +158,10 @@ class LoginAndOpeatipn:
             By.XPATH,
             ".//a[text()='编辑' and contains(@class, 't-link--theme-primary')]"
         )
-        self.driver.execute_script("arguments[0].click();", edit_link)
+        # 将上面两个步骤合二为一的选择器
+        edit_link2 = self.driver.find_element(By.XPATH, "//*[@id='content']/div[1]/div[2]/div/div/div/div/div/div["
+                                                        "1]/table/tbody/tr[1]/td[14]/div/div[1]/a")
+        self.driver.execute_script("arguments[0].click();", edit_link2)
         sleep(1)
         open_close = self.driver.find_element(By.XPATH, "//span[contains(normalize-space(),'开启')]")
         self.driver.execute_script("arguments[0].click();", open_close)
@@ -178,40 +194,53 @@ class LoginAndOpeatipn:
 
     def delete(self):
         # 步骤1：定位第一个tr
-        first_tr = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//tbody/tr[1]"))  # 定位tbody下的第一个tr
-        )
-        # 步骤2：在第一个tr内定位“编辑”链接
-        edit_link = first_tr.find_element(
-            By.XPATH, ".//a[text()='删除']"
+        # first_tr = WebDriverWait(self.driver, 10).until(
+        #     EC.presence_of_element_located((By.XPATH, "//tbody/tr[1]"))  # 定位tbody下的第一个tr
+        # )
+        # 步骤2：在第一个tr内定位“删除”链接
+        # edit_link = first_tr.find_element(
+        #     By.XPATH, ".//a[text()='删除']"
+        # )
+        edit_link = WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//*[@id='content']/div[1]/div[2]/div/div/div/div/div/div["
+                                                      "1]/table/tbody/tr[1]/td[14]/div/div[2]/a[text()='删除']"))
         )
         self.driver.execute_script("arguments[0].click();", edit_link)
 
         # 调试：查看有多少个确认按钮
-        sleep(2)  # 等待弹窗出现
-        confirm_buttons = self.driver.find_elements(By.XPATH, "//button/span[text()='确认']")
-        print(f"🔍 找到 {len(confirm_buttons)} 个确认按钮")
+        # sleep(1)   等待弹窗出现
+        # confirm_buttons = self.driver.find_elements(By.XPATH, "//button/span[text()='确认']")
+        # print(f"🔍 找到 {len(confirm_buttons)} 个确认按钮")
 
         make_sure_delete = WebDriverWait(self.driver, 10).until(
             EC.presence_of_element_located((By.XPATH, "(//button/span[text()='确认'])[2]"))
         )
         self.driver.execute_script("arguments[0].click();", make_sure_delete)
-        sleep(5)
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//div[contains(normalize-space(),'删除成功')]"))
+        )
 
 
 if __name__ == '__main__':
     login_url = "http://58.49.94.131:18500/sw/#/login"
     #   D: / workspace / python / PyCharm2025.2.4 / chromedriver - win64 / chromedriver.exe
-    chrome_driver_path = r'D:/workspace/python/PyCharm 2025.2.4/chromedriver-win64/chromedriver.exe'
+    #   C:/Program Files/JetBrains/PyCharm Community Edition 2023.1.2/bin/chromedriver.exe
+    chrome_driver_path = r'C:/Program Files/JetBrains/PyCharm Community Edition 2023.1.2/bin/chromedriver.exe'
     login_and_open = LoginAndOpeatipn(chrome_driver_path, login_url)
     login_and_open.setup_driver()
     login_and_open.login()
     # login_and_open.debug_dom_structure()
-    login_and_open.add()
-    # a = 1
-    # while a < 20:
-    #     login_and_open.open_close()
-    #     a += 1
+    # a = 0
+    # HJ_id = 1001
+    # while a <= 1:
+    #     login_and_open.add(HJ_id)
+    #     login_and_open.delete()
     #     sleep(2)
-    login_and_open.delete()
+        # HJ_id += 1
+        # a += 1
+    a = 1
+    while a < 20:
+        login_and_open.open_close()
+        a += 1
+        sleep(2)
     login_and_open.close_driver()
