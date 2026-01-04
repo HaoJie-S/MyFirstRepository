@@ -25,3 +25,16 @@ def test_post_request():
     print("\n=== JSON格式POST请求响应结果 ===")
     print("响应状态码：", response2.status_code)
     print("响应正文（JSON格式）：", response2.json())
+
+    assert response2.status_code == 200
+    print(f"✅ 状态码验证通过: {response2.status_code}")
+
+    # 更详细的验证
+    if response2.status_code == 200:
+        print("请求成功")
+    elif response2.status_code == 400:
+        print("客户端错误：参数错误")
+    elif response2.status_code == 401:
+        print("认证失败")
+    elif response2.status_code == 500:
+        print("服务器内部错误")
