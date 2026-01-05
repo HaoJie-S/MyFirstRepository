@@ -1,6 +1,5 @@
-import pytest as pytest
+import json
 import requests
-import sys
 
 
 class TestLogin:
@@ -14,7 +13,7 @@ class TestLogin:
         # response1 = requests.post(url=self.url, data={"ticket": self.ticket})
 
         json_data = {
-            "ticket": self.ticket,
+            "ticket": self.ticket
         }
 
         # 2. 发送JSON格式的POST请求（推荐，目前大多数接口采用此格式）
@@ -32,16 +31,37 @@ class TestLogin:
         # assert response2.status_code == 200
         # print(f"✅ 状态码验证通过: {response2.status_code}")
 
-        # 更详细的验证
-        if response2.status_code == 200:
-            print("请求成功")
-        elif response2.status_code == 400:
-            print("客户端错误：参数错误")
-        elif response2.status_code == 401:
-            print("认证失败")
-        elif response2.status_code == 500:
-            print("服务器内部错误")
+        # 更详细的验证   一般用assert
+        # if response2.status_code == 200:
+        #     print("登录接口请求成功")
+        # elif response2.status_code == 400:
+        #     print("客户端错误：参数错误")
+        # elif response2.status_code == 401:
+        #     print("认证失败")
+        # elif response2.status_code == 500:
+        #     print("服务器内部错误")
 
+        result = response2.json()
+        print("=== 完整响应 ===")
+        print(result)
+        # 方法2：格式化打印（更清晰）
+        print("\n=== 格式化响应 ===")
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        # 方法3：逐字段查看
+        print("\n=== 逐字段查看 ===")
+        for key, value in result.items():
+            print(f"{key}: {value}")
+
+        # print("=====================================================================================================")
+        assert 'token' in result, "登录接口返回结果中缺少token字段"
+        # assert response2.status_code == 200, f"请求失败，状态码：{response2.status_code}"
+
+        token = result.get("token")
+        print(token)
+        if token:
+            print(f"✅ 提取到token: {token[:20]}")
+        else:
+            print("❌ 响应中没有token字段")
 
 # if __name__ == '__main__':
 #     sys.exit(pytest.main(["-s", "test_login.py"]))
