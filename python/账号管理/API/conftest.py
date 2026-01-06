@@ -27,5 +27,6 @@ def auth_token():
 
     print(f"✅ 获取token成功: {token[:20]}...")
     print("=" * 50 + "\n")
+    assert response.status_code == 200
 
     return token
