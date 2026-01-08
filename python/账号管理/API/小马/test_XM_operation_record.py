@@ -1,6 +1,7 @@
 import requests
 
 
+# 测试查询操作日志
 class TestOperationRecord:
     def test_get_operation_record(self, auth_token):
         """查询有关设备的操作记录"""
@@ -14,7 +15,7 @@ class TestOperationRecord:
         }
         response = requests.post(url, json=json_data, headers=headers)
         result = response.json()
-        print("📊 操作记录查询结果:")
+        print("📊 小马账号管理接口-操作记录查询结果:")
         print(f"  状态码: {response.status_code}")
         print(f"  业务码: {result.get('code')}")
         print(f"  数据条数: {len(result['list'])}")

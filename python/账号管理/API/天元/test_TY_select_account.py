@@ -1,6 +1,7 @@
 import requests
 
 
+# 测试查询所有的账号
 class TestAccount:
     def test_select_all_accounts(self, auth_token):
         """测试查询所有账号"""
@@ -12,7 +13,7 @@ class TestAccount:
         response = requests.post(url, json=json_data, headers=headers)
         result = response.json()
 
-        print(f"\r\n📊 查询账号列表结果:")
+        print(f"\n📊 天元位置服务-查询账号列表结果:")
         print(f"  状态码: {response.status_code}")
         print(f"  业务码: {result.get('code')}")
         # print(f"  数据条数: {result.get('list')}")

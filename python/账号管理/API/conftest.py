@@ -2,7 +2,7 @@ import pytest
 import requests
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def auth_token():
     """获取认证token（整个测试会话只获取一次）"""
     print("\n" + "=" * 50)
