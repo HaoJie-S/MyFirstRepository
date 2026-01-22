@@ -24,7 +24,7 @@ class TestAccount:
         print(f"  业务码: {result.get('code')}")
         print(f"  数据条数：{len(result['list'])}")
         import json
-        print(f"  数据：{json.dumps(result['list'], ensure_ascii=False, indent=2)}")
+        print(f"  啥玩意数据：{json.dumps(result['list'], ensure_ascii=False, indent=2)}")
 
         # if 'data' in result:
         #     print(f"  数据条数: {len(result['list'])}")
