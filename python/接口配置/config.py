@@ -31,6 +31,7 @@ TIMEOUT = 10
 # 测试账号（可以统一管理）
 TEST_ACCOUNTS = {
     "active": "23qn8022",
-    "change_pwd": "23qn8031",
+    "changed_password_diffAccount": "23qn8031",
+    "password": "123",
     "renew": "23qn8021"
 }
