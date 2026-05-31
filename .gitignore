@@ -2,7 +2,14 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+.claude/
+<<<<<<< HEAD
 .eee.py
 .pytest_cache/
 .venv/
 .vscode/
+=======
+tasks.csv
+venv/
+*.log
+>>>>>>> 0e04ac8b060ed6b57af1064ddc819f1a0cea33ec

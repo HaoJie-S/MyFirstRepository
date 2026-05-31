@@ -1,11 +1,10 @@
 from time import sleep
 
-from selenium.webdriver import Keys
-from selenium.webdriver.support import expected_conditions as EC
-
 from selenium import webdriver
+from selenium.webdriver import Keys
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
 
@@ -236,8 +235,8 @@ if __name__ == '__main__':
     #     login_and_open.add(HJ_id)
     #     login_and_open.delete()
     #     sleep(2)
-        # HJ_id += 1
-        # a += 1
+    # HJ_id += 1
+    # a += 1
     a = 1
     while a < 20:
         login_and_open.open_close()
