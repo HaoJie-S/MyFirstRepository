@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python scripts/generate_mock.py --url \"https://api.example.com/v1/users/123\" --json '{\"id\": 123, \"name\": \"张三\", \"email\": null, \"roles\": [], \"bio\": \"\", \"created_at\": \"2025-01-01T00:00:00Z\"}' --cookie \"session=abc123; tenant=mycompany\")",
+      "Bash(python scripts/generate_mock.py --url \"https://api.example.com/v1/orders\" --json '{\"order_id\": \"ORD-001\", \"user\": {\"name\": null, \"email\": \"\"}, \"items\": [], \"total\": null, \"status\": \"pending\", \"shipping_address\": {}}' --cookie \"tenant=acme; locale=zh\")"
+    ]
+  }
+}
